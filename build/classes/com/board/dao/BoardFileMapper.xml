@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace="BoardFileDao">  
+
+	 <insert id="addfile" parameterType="map">
+		insert into boardfile (fseq,upload,oriupload,path) values 
+			(board_seq.currval,#{upload},#{oriupload},#{path})
+	</insert>
+	
+	<select id="boardflieList" parameterType="int" resultType="BoardFileVO">	
+		select * from boardfile where fseq=#{gseq}
+	</select>
+	
+	<delete id="delfile" parameterType="int">
+		delete from boardfile where fseq=#{seq}
+	</delete>
+	
+	<insert id="updatefile" parameterType="map">
+		insert into boardfile (fseq,upload,oriupload,path) values 
+			(#{fseq},#{upload},#{oriupload},#{path})
+	</insert>
+	
+	<delete id="delfilename" parameterType="String">
+		delete from boardfile where upload=#{delfilename}
+	</delete>		
+</mapper>
+
+
+
+
+
+
+

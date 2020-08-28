@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace="BoardDao">  
+
+	<select id="boardList" parameterType="map" resultType="BoardVO">
+         select seq,title,name,content,pass,hit,regdate,ref,indent,step from board order by ref DESC,INDENT ASC,STEP DESC
+        
+        <!-- SELECT SEQ,NAME,TITLE,CONTENT,PASS,HIT,REGDATE FROM (SELECT A.*, ROWNUM RNUM FROM (SELECT * FROM BOARD ORDER BY SEQ DESC)A)
+		<![CDATA[
+		WHERE RNUM >= #{start} AND RNUM <= #{end}		
+		]]>	 -->		
+	</select>
+	
+	<select id="searchlist" parameterType="map" resultType="BoardVO">		
+        select seq,title,name,content,pass,hit,regdate,ref,indent,step from board
+        <where>
+			<if test="keyword !='' and keyfield == 'title'">
+				title like '%' ||#{keyword}||'%'
+			</if>
+			<if test="keyword !='' and keyfield == 'name'">
+				name like '%' ||#{keyword}||'%'
+			</if>
+			<if test="keyword !='' and keyfield == 'content'">
+				content like '%' ||#{keyword}||'%'
+			</if>
+			<!-- <if test="keyword =='' and keyfield == 'all'">
+				
+			</if> -->
+		</where>       
+        	order by ref DESC,INDENT ASC,STEP DESC
+	</select>
+	
+	
+	
+	<resultMap type="BoardVO" id="BoardVO">
+		<result property="seq" column="seq"/>
+		<result property="title" column="title"/>
+		<result property="name" column="name"/>
+		<result property="content" column="content"/>
+		<result property="pass" column="pass"/>
+		<result property="hit" column="hit"/>
+		<result property="regdate" column="regdate"/>
+		<result property="ref" column="ref"/>
+		<result property="indent" column="indent"/>
+		<result property="step" column="step"/>
+		
+		<association property="BoardFileVO" resultMap="BoardFileVO"/>
+	</resultMap>
+	
+	<resultMap type="BoardFileVO" id="BoardFileVO">
+		<result property="fseq" column="fseq"/>
+		<result property="path" column="path"/>
+		<result property="upload" column="upload"/>
+	</resultMap>	
+
+	<select id="filesearchlist" parameterType="map" resultType="BoardVO" resultMap="BoardVO">		
+         select board.seq,board.name,board.title,board.content,board.pass,board.hit,board.regdate,boardfile.fseq,boardfile.path,boardfile.upload from board inner join boardfile on board.seq=boardfile.fseq 
+        <where>
+			<if test="keyword !='' and keyfield == 'upload'">
+				upload like '%' ||#{keyword}||'%'
+			</if>			
+		</where>       
+         order by ref DESC,INDENT ASC,STEP DESC
+	</select>
+	
+	<select id="boardCount" parameterType="map" resultType="Integer">
+		SELECT COUNT(*)	FROM BOARD 
+	</select>
+	
+	<insert id="write" parameterType="boardVO">
+		insert into board (seq,title,name,content,pass,hit,regdate,ref,indent,step) values (board_seq.nextval,#{title},#{name},#{content},#{pass},0,sysdate,board_seq.currval,0,0) 
+	</insert>
+	
+	<select id="detail" parameterType="int" resultType="boardVO">
+		select * from board where seq=#{gseq}
+	</select>
+	
+	<update id="cnt" parameterType="int">
+		update board set hit=hit+1 where seq=#{gseq}
+	</update>
+	
+	<update id="update" parameterType="boardVO">
+		update board set title=#{title},name=#{name},content=#{content},pass=#{pass} where seq=#{seq} 
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from board where seq=#{gseq}
+	</delete>
+	
+	<insert id="reply" parameterType="map">
+		insert into board (seq,title,name,pass,content,hit,regdate,ref,indent,step) values (board_seq.nextval,#{title},#{name},#{pass},#{content},0,sysdate,#{ref},#{indent}+1,#{step}+1)
+	</insert>
+	
+	<update id="updaterep" parameterType="map">
+		update board set indent=indent+1 where ref=#{ref} and indent>#{indent}
+	</update>
+	
+	<update id="updatestep" parameterType="map">
+		update board set step=step+1 where indent=#{indent} and step>#{step}
+	</update>	
+	
+</mapper>
+
+
+
+
+
+
+
